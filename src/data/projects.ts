@@ -1,151 +1,89 @@
-/**
- * 6 projects rendered as portals in the Projects scene.
- * Each portal carries a unique shader hue derived from accent.
- */
-
-import { COLORS } from "@/lib/constants";
-
-export type ProjectStatus = "live" | "production" | "paused" | "ongoing";
-
 export interface Project {
   id: string;
-  index: string; // "01" → "06"
+  nodeIndex: number;
+  angleOffset: number;
   name: string;
   tagline: string;
-  status: ProjectStatus;
-  year: string;
-  url?: string;
-  /** Hex color used to tint the portal shader. */
-  accent: string;
-  /** Tags surfacing tech stack — concise. */
+  description: string;
   stack: string[];
-  /** 1-2 sentence problem framing. */
-  problem: string;
-  /** 1-2 sentence solution. */
-  solution: string;
-  /** Hard numbers — what's real about this project. */
-  metrics: { label: string; value: string }[];
-  /** Optional outbound link label. */
-  cta?: { label: string; href: string };
+  url?: string;
+  worldComponent: string;
+  accentColor: string;
 }
 
 export const PROJECTS: Project[] = [
   {
-    id: "fluvo",
-    index: "01",
-    name: "Fluvo",
-    tagline: "SaaS 360° pour agences",
-    status: "live",
-    year: "2025",
-    url: "https://fluvo.app",
-    accent: COLORS.amber,
-    stack: ["Next.js", "FastAPI", "Postgres", "Stripe", "Multi-agents"],
-    problem:
-      "Les agences pilotent leurs clients depuis 7 outils déconnectés — CRM, facturation, contenu, prospection, analytics. Personne ne voit le tableau complet.",
-    solution:
-      "Une seule console qui agrège tout, augmentée par 3 agents IA spécialisés (contenu, prospection, exécution) qui travaillent pendant que le client dort.",
-    metrics: [
-      { label: "Lignes de code", value: "20k+" },
-      { label: "Endpoints API", value: "201" },
-      { label: "Modules métier", value: "11" },
-    ],
-    cta: { label: "Voir Fluvo", href: "https://fluvo.app" },
+    id: 'fluvo',
+    nodeIndex: 1,
+    angleOffset: Math.PI * 0.25,
+    name: 'Fluvo',
+    tagline: "L'agence qui se gère elle-même.",
+    description:
+      'SaaS 360° pour agences. CRM, outbound auto, portail client, Stripe MRR, 3 agents IA. 20k+ LOC, 201 endpoints, 28 tables en production.',
+    stack: ['Next.js', 'FastAPI', 'PostgreSQL', 'Stripe', 'Resend', 'HF Spaces'],
+    url: 'https://fluvo.app',
+    worldComponent: 'WorldFluvo',
+    accentColor: '#5B8DEE',
   },
   {
-    id: "alternance-hunt",
-    index: "02",
-    name: "Alternance Hunt",
-    tagline: "Pipeline candidatures autonome",
-    status: "production",
-    year: "2025",
-    url: "https://alternance-hunt.vercel.app",
-    accent: COLORS.indigo,
-    stack: ["n8n", "Next.js", "Supabase", "PayPal", "Gmail API"],
-    problem:
-      "Trouver une alternance B2 demande 200+ candidatures manuelles, lettres personnalisées, follow-ups. Impossible à tenir en parallèle des études.",
-    solution:
-      "Pipeline n8n qui scrape WTTJ + France Travail, génère lettres avec Claude, envoie via Gmail, track les réponses, relance après 7 jours. Zéro saisie manuelle.",
-    metrics: [
-      { label: "Candidatures auto", value: "330+" },
-      { label: "Réponses positives", value: "12%" },
-      { label: "Heures gagnées/sem", value: "~25h" },
-    ],
-    cta: { label: "Voir le live", href: "https://alternance-hunt.vercel.app" },
+    id: 'hunt',
+    nodeIndex: 2,
+    angleOffset: -Math.PI * 0.3,
+    name: 'Alternance Hunt',
+    tagline: '330+ candidatures envoyées sans bouger.',
+    description:
+      'Pipeline n8n autonome. 6 sources scrapées, scoring Groq, envoi Gmail + LBA API. Live en SaaS 49€/149€.',
+    stack: ['n8n', 'Groq', 'Next.js', 'PayPal', 'Gmail API', 'LBA API'],
+    url: 'https://alternance-hunt.vercel.app',
+    worldComponent: 'WorldHunt',
+    accentColor: '#34D399',
   },
   {
-    id: "nexus-agent",
-    index: "03",
-    name: "NEXUS Agent V11",
-    tagline: "Agent IA local-first",
-    status: "ongoing",
-    year: "2025",
-    accent: COLORS.teal,
-    stack: ["LangGraph", "Ollama", "Qdrant", "FastAPI", "SearxNG"],
-    problem:
-      "Les assistants IA cloud sont chers, lents et exfiltrent les données. Pour un usage perso intensif (recherche, code, synthèse), il faut du local.",
-    solution:
-      "Agent multi-tool tournant 100% sur RTX 4070 — qwen2.5-coder + gemma3, mémoire vectorielle Qdrant, web search SearxNG, traces Langfuse. Routeur sémantique + bayésien.",
-    metrics: [
-      { label: "Tools intégrés", value: "14" },
-      { label: "Modèles locaux", value: "5" },
-      { label: "Coût API/mois", value: "0€" },
-    ],
+    id: 'nexus',
+    nodeIndex: 3,
+    angleOffset: Math.PI * 0.5,
+    name: 'NEXUS Agent',
+    tagline: 'Agent IA 100% local qui voit, navigue et exécute.',
+    description:
+      'Agent autonome FastAPI. LangGraph 7 nœuds, browser-use CDP, vision Ollama only, Qdrant embedded, SearxNG self-hosted.',
+    stack: ['LangGraph', 'FastAPI', 'Ollama', 'Qdrant', 'browser-use', 'SearxNG'],
+    worldComponent: 'WorldNexus',
+    accentColor: '#22D3EE',
   },
   {
-    id: "arcane-fury",
-    index: "04",
-    name: "Arcane Fury",
-    tagline: "Combat magique VR",
-    status: "paused",
-    year: "2024",
-    accent: COLORS.violet,
-    stack: ["Unity 6.4", "Meta Quest 3S", "ConfigurableJoint", "C#"],
-    problem:
-      "Les jeux VR de combat se contentent de pointer-cliquer avec une wand. Aucun ne propose une physique de sort qui réagit vraiment à ton geste.",
-    solution:
-      "Combat physique full-body — ConfigurableJoint pour ragdoll, 3 écoles de magie distinctes (kinésie, pyromancie, foudre), feedback haptique. Démo jouable.",
-    metrics: [
-      { label: "Écoles de magie", value: "3" },
-      { label: "Sorts implémentés", value: "12" },
-      { label: "FPS Quest 3S", value: "72" },
-    ],
+    id: 'arcane',
+    nodeIndex: 4,
+    angleOffset: -Math.PI * 0.15,
+    name: 'Arcane Fury',
+    tagline: 'Combat VR avec physique réelle.',
+    description:
+      'Jeu Unity 6.4 LTS pour Meta Quest 3S. ConfigurableJoint, 3 écoles de magie, ragdoll dynamique. MCP Unity dans le pipeline.',
+    stack: ['Unity 6.4', 'C#', 'Meta Quest 3S', 'VR', 'Physics'],
+    worldComponent: 'WorldArcane',
+    accentColor: '#FF6B35',
   },
   {
-    id: "lea-hugo-noam",
-    index: "05",
-    name: "Léa · Hugo · Noam",
-    tagline: "3 agents IA en prod dans Fluvo",
-    status: "production",
-    year: "2025",
-    accent: COLORS.cyanDeep,
-    stack: ["LangGraph", "Claude Sonnet", "n8n", "Postgres"],
-    problem:
-      "Une agence ne peut pas scaler son contenu, sa prospection ET son exécution sans recruter — chaque tâche a sa propre logique métier qui ne se délègue pas à un agent générique.",
-    solution:
-      "Trois personas spécialisés : Léa (contenu — copy, briefs, calendriers), Hugo (prospection — sourcing, outreach, qualification), Noam (exécution — onboarding, relances, livraisons). Chacun avec ses tools dédiés.",
-    metrics: [
-      { label: "Agents en prod", value: "3" },
-      { label: "Tasks/jour auto", value: "~40" },
-      { label: "Adoption clients", value: "100%" },
-    ],
+    id: 'agents',
+    nodeIndex: 5,
+    angleOffset: Math.PI * 0.4,
+    name: 'Léa · Hugo · Noam',
+    tagline: 'Mon équipe IA intégrée dans Fluvo.',
+    description:
+      '3 agents spécialisés orchestrés LangGraph. Contenu, prospection, exécution. Architecture multi-agents en production dans Fluvo.',
+    stack: ['LangGraph', 'Claude', 'Groq', 'OpenRouter', 'RAG', 'Tools'],
+    worldComponent: 'WorldAgents',
+    accentColor: '#A78BFA',
   },
   {
-    id: "jarvis",
-    index: "06",
-    name: "Jarvis",
-    tagline: "Setup Claude Code WSL personnel",
-    status: "ongoing",
-    year: "2025",
-    accent: COLORS.slate,
-    stack: ["Claude Code", "WSL2", "MCP", "Bash hooks", "Obsidian sync"],
-    problem:
-      "Claude Code de base est puissant mais générique. Pour shipper en solo sur 4 projets simultanés, il faut un terminal qui connaît mes conventions, mes skills, mes raccourcis.",
-    solution:
-      "Setup custom — 10 skills métier (cv, prospection, n8n, trading…), 12 commandes slash, 4 MCP (memory, sequentialthinking, ffuf, sqlmap), 3 hooks de validation, sync Obsidian sur /save.",
-    metrics: [
-      { label: "Skills custom", value: "10" },
-      { label: "Slash commands", value: "12" },
-      { label: "Score perso", value: "8.5/10" },
-    ],
+    id: 'jarvis',
+    nodeIndex: 6,
+    angleOffset: -Math.PI * 0.45,
+    name: 'Jarvis',
+    tagline: 'Mon assistant terminal personnel.',
+    description:
+      'Claude Code WSL avec 10 skills custom, 12 commandes slash, 4 MCP (context7, playwright, n8n, github), 3 hooks. Sync Obsidian. Score 8.5/10.',
+    stack: ['Claude Code', 'MCP', 'WSL Ubuntu', 'Bash', 'Obsidian', 'n8n'],
+    worldComponent: 'WorldJarvis',
+    accentColor: '#4ADE80',
   },
 ];

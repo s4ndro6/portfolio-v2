@@ -1,47 +1,43 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { ProgressGauge } from "@/components/hud/ProgressGauge";
-import { SceneIndicator } from "@/components/hud/SceneIndicator";
-import { NavPill } from "@/components/hud/NavPill";
-import { useAppStore } from "@/store/useAppStore";
+import { useEffect, useState } from 'react';
+import { useStore } from '@/store/useStore';
+import CustomCursor from './CustomCursor';
+import IntroText from './IntroText';
+import ProjectOverlay from './ProjectOverlay';
 
-/**
- * Minimal HUD — nav pill (top-right), progress gauge (right edge),
- * scene indicator (bottom-center). Everything else lives in the 3D scene.
- */
-export function HUD() {
-  // ESC handler — closes any open project zoom.
+export default function HUD() {
+  const [showHint, setShowHint] = useState(true);
+  const [insideProject, setInsideProject] = useState(false);
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        useAppStore.getState().setOpenProject(null);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const unsub = useStore.subscribe((s) => {
+      setShowHint(s.scrollProgress < 0.05);
+      setInsideProject(s.isInsideProject || s.isEnteringProject);
+    });
+    return unsub;
   }, []);
 
   return (
-    <div
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 50 }}
-      aria-hidden="false"
-    >
-      {/* Top-right — glassmorphism nav pill */}
-      <div className="absolute top-6 right-6 md:top-8 md:right-8 pointer-events-auto">
-        <NavPill />
+    <>
+      <CustomCursor />
+
+      <div className="hud-identity" style={{ opacity: insideProject ? 0.3 : 1 }}>
+        Sandro
+        <small>Sandro Systems · Lille</small>
       </div>
 
-      {/* Right edge — progress gauge (mini-axis) */}
-      <div className="absolute top-1/2 right-6 md:right-8 -translate-y-1/2 pointer-events-auto hidden md:block">
-        <ProgressGauge />
+      <div className="hud-nav" style={{ opacity: insideProject ? 0.3 : 1 }}>
+        <span className="hud-pill">B2 · Sept 2026</span>
+        <a href="mailto:alessandroschillaci05@yahoo.com" className="hud-pill">
+          Contact
+        </a>
       </div>
 
-      {/* Bottom-center — scene indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none">
-        <SceneIndicator />
-      </div>
-    </div>
+      {showHint && !insideProject && <div className="scroll-hint">scroll</div>}
+
+      <IntroText />
+      <ProjectOverlay />
+    </>
   );
 }

@@ -24,7 +24,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sandro Schillaci — Architecture Liquide",
+  title: "Sandro Schillaci — Neural Tower",
   description:
     "Solo full-stack AI builder. Lille. Systèmes IA, automation, interfaces qui marquent.",
   authors: [{ name: "Alessandro Schillaci" }],
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "automation",
   ],
   openGraph: {
-    title: "Sandro Schillaci — Architecture Liquide",
+    title: "Sandro Schillaci — Neural Tower",
     description: "Solo full-stack AI builder. Systèmes qui tournent. Pas de slides.",
     type: "website",
     locale: "fr_FR",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050810",
+  themeColor: "#040408",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
