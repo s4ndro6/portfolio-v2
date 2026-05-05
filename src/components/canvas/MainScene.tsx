@@ -2,13 +2,15 @@
 
 import { Environment } from "@react-three/drei";
 import { ChoreographedCamera } from "@/components/canvas/primitives/ChoreographedCamera";
-import { DustParticles } from "@/components/canvas/primitives/DustParticles";
-import { LightLeaks } from "@/components/canvas/primitives/LightLeaks";
-import { HubEnvironment } from "@/components/canvas/scenes/HubEnvironment";
-import { AboutEnvironment } from "@/components/canvas/scenes/AboutEnvironment";
-import { SkillsConstellation } from "@/components/canvas/scenes/SkillsConstellation";
-import { ProjectPortals } from "@/components/canvas/scenes/ProjectPortals";
-import { OutroEnvironment } from "@/components/canvas/scenes/OutroEnvironment";
+import { SpinalAxis } from "@/components/canvas/primitives/SpinalAxis";
+import { Particles } from "@/components/canvas/primitives/Particles";
+import { OrigamiBird } from "@/components/canvas/primitives/OrigamiBird";
+import { HubManifesto } from "@/components/canvas/scenes/HubManifesto";
+import { AboutScreen } from "@/components/canvas/scenes/AboutScreen";
+import { SkillsRoots } from "@/components/canvas/scenes/SkillsRoots";
+import { ProjectScreens } from "@/components/canvas/scenes/ProjectScreens";
+import { ContactEnd } from "@/components/canvas/scenes/ContactEnd";
+import { MoodController } from "@/components/canvas/MoodController";
 import { useAppStore } from "@/store/useAppStore";
 import { PERF } from "@/lib/constants";
 
@@ -18,19 +20,20 @@ export function MainScene({ isMobile }: { isMobile: boolean }) {
 
   return (
     <>
-      <ChoreographedCamera disabled={isMobile || reducedMotion} />
+      <ChoreographedCamera disabled={reducedMotion} />
       <ambientLight intensity={0.18} color="#9eb1c8" />
-      <directionalLight position={[10, 14, 6]} intensity={0.55} color="#cfdcef" />
-      <Environment preset="night" environmentIntensity={0.3} />
+      <Environment preset="night" environmentIntensity={0.25} />
+      <MoodController />
 
-      <LightLeaks />
-      <DustParticles count={tier.dust} />
+      <SpinalAxis />
+      <Particles trails={tier.trails} dust={tier.dust} motes={tier.motes} />
+      {!isMobile && <OrigamiBird />}
 
-      <HubEnvironment />
-      <AboutEnvironment />
-      <SkillsConstellation />
-      <ProjectPortals />
-      <OutroEnvironment />
+      <HubManifesto />
+      <AboutScreen />
+      <SkillsRoots />
+      <ProjectScreens />
+      <ContactEnd />
     </>
   );
 }

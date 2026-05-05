@@ -1,70 +1,135 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useRef } from "react";
 import { Vector3 } from "three";
+import gsap from "gsap";
+import { AXIS_CURVE } from "@/lib/curve";
 import { useAppStore } from "@/store/useAppStore";
-import { PARALLAX_DAMP, SCENES } from "@/lib/constants";
+import { ANCHORS, PARALLAX_DAMP } from "@/lib/constants";
+import { PROJECTS } from "@/data/projects";
 
-const TARGET = new Vector3();
-const POS = new Vector3();
-const PARALLAX = new Vector3();
+const SCRATCH = {
+  pos: new Vector3(),
+  ahead: new Vector3(),
+  tan: new Vector3(),
+  side: new Vector3(),
+  right: new Vector3(),
+  zoomTarget: new Vector3(),
+  zoomLook: new Vector3(),
+};
+
+const UP = new Vector3(0, 1, 0);
+
+interface Props {
+  disabled?: boolean;
+}
 
 /**
- * Master camera choreography.
- * Drives camera.z from scroll progress (z=18 → z=-180), with light parallax
- * driven by mouse position. No GSAP timeline here — Lenis already smooths
- * the scroll, and using a frame-loop interpolator keeps the camera bound to
- * actual paint time, not to ScrollTrigger ticks.
+ * Camera rig — slides along the spinal axis curve.
+ * Position = curve.getPointAt(t) + side offset (1.6u right, 0.5u up).
+ * LookAt   = curve.getPointAt(t + 0.012) — looking forward along the axis.
+ *
+ * On openProject set: smoothly tweens to the panel position (zoom-in).
+ * On close: tweens back to the rail.
  */
-export function ChoreographedCamera({ disabled = false }: { disabled?: boolean }) {
-  const { camera } = useThree();
-  const targetZ = useRef(18);
-  const targetX = useRef(0);
-  const targetY = useRef(0);
+export function ChoreographedCamera({ disabled = false }: Props) {
+  const camera = useThree((s) => s.camera);
+  const renderedT = useRef(0);
+  const zoomFactor = useRef({ value: 0 });
+  const tween = useRef<gsap.core.Tween | null>(null);
 
-  useFrame((_, delta) => {
+  // Read store imperatively (avoid re-running on every frame)
+  useFrame(() => {
     if (disabled) return;
-    const { scrollProgress, mouse, currentScene } = useAppStore.getState();
+    const { scrollProgress, mouse, openProject } = useAppStore.getState();
 
-    // Map progress 0..1 → camera z by interpolating across scenes.
-    targetZ.current = zFromProgress(scrollProgress);
+    const t = Math.min(0.985, Math.max(0, scrollProgress));
+    renderedT.current += (t - renderedT.current) * 0.16;
 
-    // Subtle lateral drift per scene — gives each section a unique attitude.
-    const drift = SCENE_DRIFTS[currentScene];
-    targetX.current = drift.x + mouse.x * PARALLAX_DAMP * 6;
-    targetY.current = drift.y + -mouse.y * PARALLAX_DAMP * 4;
+    AXIS_CURVE.getPointAt(renderedT.current, SCRATCH.pos);
+    AXIS_CURVE.getPointAt(
+      Math.min(0.999, renderedT.current + 0.012),
+      SCRATCH.ahead,
+    );
+    AXIS_CURVE.getTangentAt(renderedT.current, SCRATCH.tan).normalize();
 
-    POS.copy(camera.position);
-    PARALLAX.set(targetX.current, targetY.current, targetZ.current);
-    POS.lerp(PARALLAX, Math.min(1, delta * 4));
-    camera.position.copy(POS);
+    SCRATCH.right.copy(SCRATCH.tan).cross(UP).normalize();
 
-    // Slight look-ahead — camera always faces the next scene anchor.
-    TARGET.set(targetX.current * 0.4, targetY.current * 0.4, targetZ.current - 8);
-    camera.lookAt(TARGET);
+    const railX = SCRATCH.pos.x + SCRATCH.right.x * 1.6;
+    const railY = SCRATCH.pos.y + 0.5;
+    const railZ = SCRATCH.pos.z + SCRATCH.right.z * 1.6;
+
+    const parallaxX = mouse.x * PARALLAX_DAMP * 6;
+    const parallaxY = -mouse.y * PARALLAX_DAMP * 4;
+
+    let zx = railX,
+      zy = railY,
+      zz = railZ;
+    let lx = SCRATCH.ahead.x,
+      ly = SCRATCH.ahead.y,
+      lz = SCRATCH.ahead.z;
+
+    if (openProject) {
+      const idx = PROJECTS.findIndex((p) => p.id === openProject);
+      if (idx >= 0) {
+        const panelT = ANCHORS.projects[idx];
+        const side = idx % 2 === 0 ? -1 : 1;
+        AXIS_CURVE.getPointAt(panelT, SCRATCH.zoomLook);
+        AXIS_CURVE.getTangentAt(panelT, SCRATCH.tan).normalize();
+        SCRATCH.right.copy(SCRATCH.tan).cross(UP).normalize();
+
+        SCRATCH.zoomLook.x += SCRATCH.right.x * side * 3.5;
+        SCRATCH.zoomLook.z += SCRATCH.right.z * side * 3.5;
+        SCRATCH.zoomLook.y += -0.4;
+
+        SCRATCH.zoomTarget.copy(SCRATCH.zoomLook);
+        SCRATCH.zoomTarget.x -= SCRATCH.tan.x * 4.5;
+        SCRATCH.zoomTarget.y += 0.4;
+        SCRATCH.zoomTarget.z -= SCRATCH.tan.z * 4.5;
+
+        const k = zoomFactor.current.value;
+        zx = railX * (1 - k) + SCRATCH.zoomTarget.x * k;
+        zy = railY * (1 - k) + SCRATCH.zoomTarget.y * k;
+        zz = railZ * (1 - k) + SCRATCH.zoomTarget.z * k;
+        lx = SCRATCH.ahead.x * (1 - k) + SCRATCH.zoomLook.x * k;
+        ly = SCRATCH.ahead.y * (1 - k) + SCRATCH.zoomLook.y * k;
+        lz = SCRATCH.ahead.z * (1 - k) + SCRATCH.zoomLook.z * k;
+      }
+    } else if (zoomFactor.current.value > 0.001) {
+      // Closing: blend with last zoom target until factor reaches 0
+      const k = zoomFactor.current.value;
+      zx = railX * (1 - k) + SCRATCH.zoomTarget.x * k;
+      zy = railY * (1 - k) + SCRATCH.zoomTarget.y * k;
+      zz = railZ * (1 - k) + SCRATCH.zoomTarget.z * k;
+      lx = SCRATCH.ahead.x * (1 - k) + SCRATCH.zoomLook.x * k;
+      ly = SCRATCH.ahead.y * (1 - k) + SCRATCH.zoomLook.y * k;
+      lz = SCRATCH.ahead.z * (1 - k) + SCRATCH.zoomLook.z * k;
+    }
+
+    camera.position.set(zx + parallaxX, zy + parallaxY, zz);
+    camera.lookAt(lx, ly, lz);
   });
+
+  // Tween the zoom factor when openProject changes.
+  useEffect(() => {
+    let lastOpen: string | null = null;
+    const unsub = useAppStore.subscribe((state) => {
+      if (state.openProject !== lastOpen) {
+        lastOpen = state.openProject;
+        tween.current?.kill();
+        tween.current = gsap.to(zoomFactor.current, {
+          value: state.openProject ? 1 : 0,
+          duration: state.openProject ? 1.2 : 0.9,
+          ease: "expo.out",
+        });
+      }
+    });
+    return () => {
+      unsub();
+      tween.current?.kill();
+    };
+  }, []);
 
   return null;
 }
-
-function zFromProgress(p: number): number {
-  // Find the active scene segment then linear-interpolate within it.
-  const scenes = Object.values(SCENES);
-  for (const s of scenes) {
-    const [a, b] = s.range;
-    if (p <= b) {
-      const local = (p - a) / Math.max(0.0001, b - a);
-      return s.z[0] + (s.z[1] - s.z[0]) * Math.min(1, Math.max(0, local));
-    }
-  }
-  return scenes[scenes.length - 1].z[1];
-}
-
-const SCENE_DRIFTS: Record<string, { x: number; y: number }> = {
-  hub: { x: 0, y: 0.5 },
-  about: { x: -1.2, y: 0 },
-  skills: { x: 0, y: 0.8 },
-  projects: { x: 0.8, y: -0.4 },
-  outro: { x: 0, y: 0 },
-};

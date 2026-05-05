@@ -3,23 +3,31 @@
 import { useAppStore } from "@/store/useAppStore";
 import { SCENE_ORDER, SCENES } from "@/lib/constants";
 
+/**
+ * Bottom-center wayfinding — vertebra label + mini progress bar.
+ */
 export function SceneIndicator() {
   const current = useAppStore((s) => s.currentScene);
+  const sp = useAppStore((s) => s.scrollProgress);
   const idx = SCENE_ORDER.indexOf(current) + 1;
   const total = SCENE_ORDER.length;
   const label = SCENES[current].label;
 
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-mono text-[10px] tracking-[0.2em] text-text-faint uppercase">
-        Scène
+    <div className="scene-indicator">
+      <span className="scene-indicator__bar">
+        <span
+          className="scene-indicator__fill"
+          style={{ width: `${Math.min(100, Math.max(0, sp * 100))}%` }}
+        />
+        <span
+          className="scene-indicator__cursor"
+          style={{ left: `${Math.min(100, Math.max(0, sp * 100))}%` }}
+        />
       </span>
-      <span className="font-display text-3xl leading-none">
-        {String(idx).padStart(2, "0")}
-        <span className="text-text-faint">/{String(total).padStart(2, "0")}</span>
-      </span>
-      <span className="font-display-italic text-text-dim text-base mt-1">
-        {label}
+      <span className="scene-indicator__label">
+        VERTÈBRE {String(idx).padStart(2, "0")}/{String(total).padStart(2, "0")} ·{" "}
+        <span className="scene-indicator__name">{label}</span>
       </span>
     </div>
   );

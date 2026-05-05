@@ -6,9 +6,13 @@ import type { SceneId } from "@/lib/constants";
 export type GpuTier = 0 | 1 | 2 | 3;
 
 export interface AppState {
-  /** Global scroll progress 0-1, driven by Lenis. */
+  /** Global scroll progress 0-1, driven by Lenis. Mapped to axis t. */
   scrollProgress: number;
   setScrollProgress: (v: number) => void;
+
+  /** Pre-zoom progress, restored when modal closes. */
+  scrollProgressBeforeZoom: number | null;
+  setScrollProgressBeforeZoom: (v: number | null) => void;
 
   /** Which scene is currently active, derived from scroll. */
   currentScene: SceneId;
@@ -29,7 +33,7 @@ export interface AppState {
   isLoading: boolean;
   setIsLoading: (v: boolean) => void;
 
-  /** Currently open project id (modal), or null. */
+  /** Currently zoomed project id, or null. */
   openProject: string | null;
   setOpenProject: (id: string | null) => void;
 
@@ -41,6 +45,9 @@ export interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   scrollProgress: 0,
   setScrollProgress: (v) => set({ scrollProgress: v }),
+
+  scrollProgressBeforeZoom: null,
+  setScrollProgressBeforeZoom: (v) => set({ scrollProgressBeforeZoom: v }),
 
   currentScene: "hub",
   setCurrentScene: (s) => set({ currentScene: s }),

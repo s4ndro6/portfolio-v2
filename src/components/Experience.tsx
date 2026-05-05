@@ -7,7 +7,6 @@ import { Sections } from "@/components/sections/Sections";
 import { HUD } from "@/components/hud/HUD";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Loader } from "@/components/Loader";
-import { ProjectModal } from "@/components/ProjectModal";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -44,7 +43,6 @@ export function Experience() {
       <CanvasRoot />
       <Sections />
       <HUD />
-      <ProjectModal />
       <CustomCursor />
       <Loader />
     </SmoothScroll>
