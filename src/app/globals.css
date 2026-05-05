@@ -1,26 +1,234 @@
 @import "tailwindcss";
 
+/* ============================================================
+   ARCHITECTURE LIQUIDE — Design System
+   Palette froide + UN accent chaud sodium amber
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core void / mid / text */
+  --void: #050810;
+  --mid: #131b26;
+  --mid-elevated: #1a2331;
+  --text: #e8ecf0;
+  --text-dim: #8a94a3;
+  --text-faint: #4a5666;
+
+  /* Cluster colors (cool palette) */
+  --indigo: #6366f1;
+  --teal: #14b8a6;
+  --violet: #8b5cf6;
+  --cyan-deep: #0891b2;
+  --slate: #64748b;
+
+  /* THE accent — sodium amber, reserved for active interactions */
+  --amber: #ffb454;
+  --amber-glow: #ffb45433;
+
+  /* Semantic */
+  --bg: var(--void);
+  --fg: var(--text);
+
+  /* Type scale */
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", "SF Mono", monospace;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Spacing rhythm (8px grid) */
+  --gap-xs: 0.5rem;
+  --gap-sm: 1rem;
+  --gap-md: 1.5rem;
+  --gap-lg: 2.5rem;
+  --gap-xl: 4rem;
+  --gap-xxl: 8rem;
+
+  /* Radii — none rounded-everything; sharp & specific */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 8px;
+
+  /* z-layers */
+  --z-canvas: 0;
+  --z-content: 10;
+  --z-hud: 50;
+  --z-cursor: 90;
+  --z-loader: 100;
+  --z-modal: 80;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-void: var(--void);
+  --color-mid: var(--mid);
+  --color-mid-elevated: var(--mid-elevated);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-faint: var(--text-faint);
+  --color-indigo: var(--indigo);
+  --color-teal: var(--teal);
+  --color-violet: var(--violet);
+  --color-cyan-deep: var(--cyan-deep);
+  --color-slate: var(--slate);
+  --color-amber: var(--amber);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+html {
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  /* Hide native cursor — replaced by custom */
+  cursor: none;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  body {
+    cursor: auto;
+  }
+}
+
+::selection {
+  background: var(--amber);
+  color: var(--void);
+}
+
+/* ============================================================
+   FOCUS — visible amber outline
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.font-display-italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* ============================================================
+   GLOBAL HELPERS
+   ============================================================ */
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.divider-amber {
+  width: 32px;
+  height: 1px;
+  background: var(--amber);
+  display: inline-block;
+}
+
+/* Canvas root layer */
+.canvas-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+  pointer-events: none;
+}
+
+/* HTML overlay sections — let canvas show through */
+.scene-section {
+  position: relative;
+  min-height: 100dvh;
+  z-index: var(--z-content);
+  pointer-events: none;
+}
+.scene-section > * {
+  pointer-events: auto;
+}
+
+/* ============================================================
+   REDUCED MOTION — respect user
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   LENIS — required global
+   ============================================================ */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
 }

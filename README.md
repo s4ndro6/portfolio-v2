@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sandro Schillaci — Architecture Liquide
 
-## Getting Started
+Portfolio immersif WebGL. 5 scènes traversées par caméra continue, palette froide + amber sodium, prismes verre, constellation skills, portails projets.
 
-First, run the development server:
+## Stack
+
+Next.js 16 · React 19 · TypeScript strict · React Three Fiber 9 · drei 10 · postprocessing · GSAP · Lenis · Zustand · framer-motion · Tailwind v4
+
+## Local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev      # http://localhost:3000
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/            layout, globals, page
+  components/
+    canvas/       R3F (CanvasRoot, MainScene, PostFX, primitives, scenes)
+    sections/     overlays HTML (Hub, About, Skills, Projects, Contact)
+    hud/          HUD vertical, progress, scene indicator, audio toggle
+  data/           projects, skills
+  lib/            constants (palette, scenes, perf tiers)
+  store/          Zustand global state
+  hooks/          useViewport, useReducedMotion
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scènes
 
-## Learn More
+| # | Scene    | z range      |
+|---|----------|--------------|
+| 1 | Hub      | 0 → 18       |
+| 2 | About    | -22 → -38    |
+| 3 | Skills   | -56 → -86    |
+| 4 | Projects | -110 → -150  |
+| 5 | Outro    | -170 → -190  |
 
-To learn more about Next.js, take a look at the following resources:
+## Performance
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Mobile : DPR 1.5, dust 200, no postFX, camera disabled
+- Desktop : DPR 2, dust 1500, postFX (bloom + CA + vignette + noise)
+- `prefers-reduced-motion` : native scroll, frameloop demand, camera locked
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Déploiement
 
-## Deploy on Vercel
+Vercel — branche `main`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© 2026 Sandro Schillaci · Lille
