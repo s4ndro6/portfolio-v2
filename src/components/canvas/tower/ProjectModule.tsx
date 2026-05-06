@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useMemo, useState } from 'react';
-import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import {
   Group,
@@ -12,7 +12,6 @@ import {
   BufferGeometry,
   BufferAttribute,
 } from 'three';
-import { TOWER_CONFIG } from '@/data/tower';
 import type { Project } from '@/data/projects';
 import { useStore } from '@/store/useStore';
 
@@ -52,7 +51,6 @@ const FRAG = /* glsl */ `
 
 const PANEL_W = 5;
 const PANEL_H = 3.2;
-const BRANCH_LEN = 4.5;
 
 function hexToVec3(hex: string): Vector3 {
   return new Vector3(
@@ -70,15 +68,12 @@ export default function ProjectModule({ project }: Props) {
   const groupRef = useRef<Group>(null);
   const matRef = useRef<ShaderMaterial>(null);
   const [hovered, setHovered] = useState(false);
-  const { camera } = useThree();
   const enterProject = useStore((s) => s.enterProject);
   const setGlobalHovered = useStore((s) => s.setHovered);
 
-  const nodeY =
-    project.nodeIndex * TOWER_CONFIG.nodeSpacing - TOWER_CONFIG.totalHeight / 2;
-  const branchX = Math.sin(project.angleOffset) * BRANCH_LEN;
-  const branchZ = Math.cos(project.angleOffset) * BRANCH_LEN;
-  const colorVec = useMemo(() => hexToVec3(project.accentColor), [project.accentColor]);
+  const branchX = Math.sin(project.angle) * project.branchLen;
+  const branchZ = Math.cos(project.angle) * project.branchLen;
+  const colorVec = useMemo(() => hexToVec3(project.color), [project.color]);
 
   // Connection wire geometry (module → axis)
   const wireGeo = useMemo(() => {
@@ -88,33 +83,30 @@ export default function ProjectModule({ project }: Props) {
     return g;
   }, [branchX, branchZ]);
 
-  // Edge frame geometry
   const edgeGeo = useMemo(() => {
     const plane = new PlaneGeometry(PANEL_W + 0.1, PANEL_H + 0.1);
     return new EdgesGeometry(plane);
   }, []);
 
-  const _scratchVec = useMemo(() => new Vector3(), []);
+  const _worldPos = useMemo(() => new Vector3(), []);
 
-  useFrame(({ clock }) => {
-    if (!matRef.current || !groupRef.current) return;
+  useFrame(({ camera, clock }) => {
     const t = clock.elapsedTime;
-    matRef.current.uniforms.u_time.value = t;
-    matRef.current.uniforms.u_hover.value +=
-      ((hovered ? 1 : 0) - matRef.current.uniforms.u_hover.value) * 0.08;
+    if (matRef.current) {
+      matRef.current.uniforms.u_time.value = t;
+      matRef.current.uniforms.u_hover.value +=
+        ((hovered ? 1 : 0) - matRef.current.uniforms.u_hover.value) * 0.07;
+    }
+    if (groupRef.current) {
+      // Levitation
+      groupRef.current.position.y =
+        project.nodeY + Math.sin(t * 0.4 + project.index) * 0.18;
 
-    // Levitation
-    groupRef.current.position.y = nodeY + Math.sin(t * 0.4 + project.nodeIndex) * 0.12;
-
-    if (hovered) {
-      groupRef.current.getWorldPosition(_scratchVec);
-      _scratchVec.subVectors(camera.position, _scratchVec).normalize();
-      const targetY = Math.atan2(_scratchVec.x, _scratchVec.z);
-      groupRef.current.rotation.y +=
-        (targetY - groupRef.current.rotation.y) * 0.05;
-    } else {
-      groupRef.current.rotation.y +=
-        (project.angleOffset - groupRef.current.rotation.y) * 0.03;
+      // Always face the camera (Y-axis billboarding)
+      groupRef.current.getWorldPosition(_worldPos);
+      const dx = camera.position.x - _worldPos.x;
+      const dz = camera.position.z - _worldPos.z;
+      groupRef.current.rotation.y = Math.atan2(dx, dz);
     }
   });
 
@@ -135,11 +127,11 @@ export default function ProjectModule({ project }: Props) {
   };
 
   return (
-    <group ref={groupRef} position={[branchX, nodeY, branchZ]}>
+    <group ref={groupRef} position={[branchX, project.nodeY, branchZ]}>
       {/* connection wire to axis */}
       <lineSegments geometry={wireGeo}>
         <lineBasicMaterial
-          color={project.accentColor}
+          color={project.color}
           transparent
           opacity={hovered ? 0.85 : 0.3}
         />
@@ -167,7 +159,7 @@ export default function ProjectModule({ project }: Props) {
       {/* edge frame */}
       <lineSegments geometry={edgeGeo}>
         <lineBasicMaterial
-          color={project.accentColor}
+          color={project.color}
           transparent
           opacity={hovered ? 0.95 : 0.25}
         />
@@ -179,7 +171,7 @@ export default function ProjectModule({ project }: Props) {
           <Text
             position={[0, -1.9, 0.05]}
             fontSize={0.32}
-            color={project.accentColor}
+            color={project.color}
             anchorX="center"
             fontStyle="italic"
           >
@@ -203,7 +195,7 @@ export default function ProjectModule({ project }: Props) {
         color="#5A5F69"
         anchorX="left"
       >
-        {`0${project.nodeIndex}`}
+        {`0${project.index + 1}`}
       </Text>
     </group>
   );

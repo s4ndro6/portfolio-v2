@@ -1,89 +1,96 @@
 export interface Project {
   id: string;
-  nodeIndex: number;
-  angleOffset: number;
+  index: number;
   name: string;
   tagline: string;
   description: string;
   stack: string[];
   url?: string;
-  worldComponent: string;
-  accentColor: string;
+  color: string;
+  nodeY: number;
+  angle: number;
+  branchLen: number;
 }
 
 export const PROJECTS: Project[] = [
   {
     id: 'fluvo',
-    nodeIndex: 1,
-    angleOffset: Math.PI * 0.25,
+    index: 0,
     name: 'Fluvo',
     tagline: "L'agence qui se gère elle-même.",
     description:
-      'SaaS 360° pour agences. CRM, outbound auto, portail client, Stripe MRR, 3 agents IA. 20k+ LOC, 201 endpoints, 28 tables en production.',
-    stack: ['Next.js', 'FastAPI', 'PostgreSQL', 'Stripe', 'Resend', 'HF Spaces'],
+      'SaaS 360° pour agences digitales. CRM, outbound auto, portail client, Stripe MRR, 3 agents IA. 20k LOC, 201 endpoints, 28 tables.',
+    stack: ['Next.js', 'FastAPI', 'PostgreSQL', 'Stripe', 'Resend'],
     url: 'https://fluvo.app',
-    worldComponent: 'WorldFluvo',
-    accentColor: '#5B8DEE',
+    color: '#5B8DEE',
+    nodeY: 9,
+    angle: 0.0,
+    branchLen: 7,
   },
   {
     id: 'hunt',
-    nodeIndex: 2,
-    angleOffset: -Math.PI * 0.3,
+    index: 1,
     name: 'Alternance Hunt',
     tagline: '330+ candidatures envoyées sans bouger.',
     description:
-      'Pipeline n8n autonome. 6 sources scrapées, scoring Groq, envoi Gmail + LBA API. Live en SaaS 49€/149€.',
-    stack: ['n8n', 'Groq', 'Next.js', 'PayPal', 'Gmail API', 'LBA API'],
+      'Pipeline n8n autonome. 6 sources scrapées, scoring Groq, envoi Gmail + LBA API.',
+    stack: ['n8n', 'Groq', 'Next.js', 'Gmail API'],
     url: 'https://alternance-hunt.vercel.app',
-    worldComponent: 'WorldHunt',
-    accentColor: '#34D399',
+    color: '#34D399',
+    nodeY: 5,
+    angle: Math.PI / 3,
+    branchLen: 7,
   },
   {
     id: 'nexus',
-    nodeIndex: 3,
-    angleOffset: Math.PI * 0.5,
+    index: 2,
     name: 'NEXUS Agent',
-    tagline: 'Agent IA 100% local qui voit, navigue et exécute.',
+    tagline: 'Agent IA local qui voit et navigue.',
     description:
-      'Agent autonome FastAPI. LangGraph 7 nœuds, browser-use CDP, vision Ollama only, Qdrant embedded, SearxNG self-hosted.',
-    stack: ['LangGraph', 'FastAPI', 'Ollama', 'Qdrant', 'browser-use', 'SearxNG'],
-    worldComponent: 'WorldNexus',
-    accentColor: '#22D3EE',
+      'FastAPI + LangGraph 7 nœuds, browser-use CDP, vision Ollama only, Qdrant.',
+    stack: ['LangGraph', 'FastAPI', 'Ollama', 'Qdrant'],
+    color: '#22D3EE',
+    nodeY: 1,
+    angle: (Math.PI * 2) / 3,
+    branchLen: 7,
   },
   {
     id: 'arcane',
-    nodeIndex: 4,
-    angleOffset: -Math.PI * 0.15,
+    index: 3,
     name: 'Arcane Fury',
     tagline: 'Combat VR avec physique réelle.',
     description:
-      'Jeu Unity 6.4 LTS pour Meta Quest 3S. ConfigurableJoint, 3 écoles de magie, ragdoll dynamique. MCP Unity dans le pipeline.',
-    stack: ['Unity 6.4', 'C#', 'Meta Quest 3S', 'VR', 'Physics'],
-    worldComponent: 'WorldArcane',
-    accentColor: '#FF6B35',
+      'Jeu Unity 6.4 LTS Meta Quest 3S. ConfigurableJoint, 3 écoles de magie, ragdoll.',
+    stack: ['Unity 6.4', 'C#', 'Meta Quest 3S', 'VR'],
+    color: '#FF6B35',
+    nodeY: -3,
+    angle: Math.PI,
+    branchLen: 7,
   },
   {
     id: 'agents',
-    nodeIndex: 5,
-    angleOffset: Math.PI * 0.4,
+    index: 4,
     name: 'Léa · Hugo · Noam',
-    tagline: 'Mon équipe IA intégrée dans Fluvo.',
+    tagline: 'Mon équipe IA dans Fluvo.',
     description:
-      '3 agents spécialisés orchestrés LangGraph. Contenu, prospection, exécution. Architecture multi-agents en production dans Fluvo.',
-    stack: ['LangGraph', 'Claude', 'Groq', 'OpenRouter', 'RAG', 'Tools'],
-    worldComponent: 'WorldAgents',
-    accentColor: '#A78BFA',
+      '3 agents LangGraph spécialisés en prod dans Fluvo. Contenu, prospection, exécution.',
+    stack: ['LangGraph', 'Claude', 'Groq', 'RAG'],
+    color: '#A78BFA',
+    nodeY: -7,
+    angle: (Math.PI * 4) / 3,
+    branchLen: 7,
   },
   {
     id: 'jarvis',
-    nodeIndex: 6,
-    angleOffset: -Math.PI * 0.45,
+    index: 5,
     name: 'Jarvis',
-    tagline: 'Mon assistant terminal personnel.',
+    tagline: 'Mon terminal augmenté.',
     description:
-      'Claude Code WSL avec 10 skills custom, 12 commandes slash, 4 MCP (context7, playwright, n8n, github), 3 hooks. Sync Obsidian. Score 8.5/10.',
-    stack: ['Claude Code', 'MCP', 'WSL Ubuntu', 'Bash', 'Obsidian', 'n8n'],
-    worldComponent: 'WorldJarvis',
-    accentColor: '#4ADE80',
+      'Claude Code WSL, 10 skills custom, 12 commandes, 4 MCP, 3 hooks. Sync Obsidian.',
+    stack: ['Claude Code', 'MCP', 'WSL', 'Bash'],
+    color: '#4ADE80',
+    nodeY: -11,
+    angle: (Math.PI * 5) / 3,
+    branchLen: 7,
   },
 ];

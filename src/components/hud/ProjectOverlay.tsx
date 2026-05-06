@@ -25,7 +25,7 @@ export default function ProjectOverlay() {
   return (
     <div className="project-overlay">
       <div className="project-content">
-        <div className="project-meta" style={{ color: project.accentColor }}>
+        <div className="project-meta" style={{ color: project.color }}>
           {project.id.toUpperCase()}
         </div>
         <h2 className="project-name">{project.name}</h2>
@@ -34,7 +34,7 @@ export default function ProjectOverlay() {
 
         <div className="project-stack">
           {project.stack.map((s) => (
-            <span key={s} className="stack-pill" style={{ borderColor: `${project.accentColor}55` }}>
+            <span key={s} className="stack-pill" style={{ borderColor: `${project.color}55` }}>
               {s}
             </span>
           ))}
@@ -46,7 +46,7 @@ export default function ProjectOverlay() {
             target="_blank"
             rel="noreferrer"
             className="project-url"
-            style={{ color: project.accentColor, borderColor: `${project.accentColor}88` }}
+            style={{ color: project.color, borderColor: `${project.color}88` }}
           >
             {project.url.replace(/^https?:\/\//, '')} ↗
           </a>

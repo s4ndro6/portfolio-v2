@@ -29,9 +29,9 @@ export default function CanvasRoot() {
       </Suspense>
       <EffectComposer multisampling={0}>
         <Bloom
-          intensity={2.0}
-          luminanceThreshold={0.08}
-          luminanceSmoothing={0.3}
+          intensity={0.8}
+          luminanceThreshold={0.3}
+          luminanceSmoothing={0.5}
           mipmapBlur
         />
         <ChromaticAberration
