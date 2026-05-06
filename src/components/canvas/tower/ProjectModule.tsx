@@ -15,7 +15,6 @@ import {
 import { TOWER_CONFIG } from '@/data/tower';
 import type { Project } from '@/data/projects';
 import { useStore } from '@/store/useStore';
-import { FONT } from '@/lib/fonts';
 
 const VERT = /* glsl */ `
   varying vec2 vUv;
@@ -182,7 +181,7 @@ export default function ProjectModule({ project }: Props) {
             fontSize={0.32}
             color={project.accentColor}
             anchorX="center"
-            font={FONT.displayItalic}
+            fontStyle="italic"
           >
             {project.name}
           </Text>
@@ -191,7 +190,6 @@ export default function ProjectModule({ project }: Props) {
             fontSize={0.14}
             color="#A8AEB8"
             anchorX="center"
-            font={FONT.mono}
           >
             {project.tagline}
           </Text>
@@ -204,7 +202,6 @@ export default function ProjectModule({ project }: Props) {
         fontSize={0.13}
         color="#5A5F69"
         anchorX="left"
-        font={FONT.mono}
       >
         {`0${project.nodeIndex}`}
       </Text>

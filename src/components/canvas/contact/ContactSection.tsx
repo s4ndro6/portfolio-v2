@@ -105,7 +105,6 @@ function ContactNode({ node }: { node: Node }) {
         letterSpacing={0.18}
         anchorX="center"
         anchorY="middle"
-        font="/fonts/JetBrainsMono-Regular.ttf"
       >
         {node.label}
       </Text>
@@ -139,7 +138,7 @@ export default function ContactSection() {
         color="#FFB454"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/CormorantGaramond-MediumItalic.ttf"
+        fontStyle="italic"
       >
         let&apos;s build something
       </Text>

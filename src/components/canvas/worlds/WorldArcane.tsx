@@ -78,7 +78,7 @@ export default function WorldArcane() {
       {/* Hilt */}
       <mesh position={[0, -2.2, 0]}>
         <boxGeometry args={[0.5, 0.12, 0.18]} />
-        <meshStandardMaterial color="#222" emissive="#FF6B35" emissiveIntensity={1.5} />
+        <meshStandardMaterial color="#222" emissive="#FF6B35" emissiveIntensity={2.5} />
       </mesh>
 
       {/* Embers */}
