@@ -22,6 +22,7 @@ export default function CanvasRoot() {
       dpr={[1, 2]}
       camera={{ position: [0, 8, 12], fov: 55, near: 0.1, far: 300 }}
       shadows={false}
+      style={{ touchAction: 'pan-y' }}
     >
       <Suspense fallback={null}>
         <World />

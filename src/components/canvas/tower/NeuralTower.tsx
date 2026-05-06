@@ -37,10 +37,10 @@ export default function NeuralTower() {
 
   useLayoutEffect(() => {
     const trigger = ScrollTrigger.create({
-      trigger: 'body',
+      trigger: document.body,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.2,
+      scrub: 1.5,
       onUpdate(self) {
         const p = self.progress;
         useStore.getState().setScroll(p);
@@ -68,7 +68,11 @@ export default function NeuralTower() {
       },
     });
 
+    // Refresh after mount in case body height changes (fonts, dynamic content).
+    const refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100);
+
     return () => {
+      clearTimeout(refreshTimer);
       trigger.kill();
     };
   }, []);

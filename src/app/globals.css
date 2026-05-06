@@ -19,6 +19,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: auto !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden;
+}
 html {
   scrollbar-width: none;
 }
@@ -30,7 +35,6 @@ body {
   background: var(--void);
   color: var(--text);
   font-family: var(--font-b);
-  overflow-x: hidden;
   cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
