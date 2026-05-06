@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Suspense } from 'react';
+import { Environment } from '@react-three/drei';
 import {
   EffectComposer,
   Bloom,
@@ -20,6 +21,7 @@ export default function CanvasRoot() {
       camera={{ position: [0, 1.6, 6], fov: 60, near: 0.01, far: 300 }}
     >
       <Suspense fallback={null}>
+        <Environment preset="night" />
         <Experience />
       </Suspense>
       <EffectComposer multisampling={0}>
