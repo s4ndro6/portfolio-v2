@@ -393,6 +393,30 @@ export default function FlowStation({ project, position, rotationY, stationIndex
 
   return (
     <group ref={groupRef} position={position} rotation={[0, rotationY, 0]}>
+      {/* Halo volumétrique large derrière l'écran (brume colorée) */}
+      <mesh position={[0, 0, -0.4]}>
+        <planeGeometry args={[SCREEN_W * 2.2, SCREEN_H * 2.4]} />
+        <meshBasicMaterial
+          color={project.color}
+          transparent
+          opacity={hovered ? 0.18 : 0.10}
+          depthWrite={false}
+          blending={2 /* AdditiveBlending */}
+        />
+      </mesh>
+
+      {/* Halo intermédiaire plus serré */}
+      <mesh position={[0, 0, -0.2]}>
+        <planeGeometry args={[SCREEN_W * 1.4, SCREEN_H * 1.6]} />
+        <meshBasicMaterial
+          color={project.color}
+          transparent
+          opacity={hovered ? 0.22 : 0.13}
+          depthWrite={false}
+          blending={2}
+        />
+      </mesh>
+
       {/* Fond en retrait — légère emissive du projet */}
       <mesh position={[0, 0, -0.08]}>
         <planeGeometry args={[SCREEN_W + 0.4, SCREEN_H + 0.4]} />
@@ -400,6 +424,21 @@ export default function FlowStation({ project, position, rotationY, stationIndex
           color="#040408"
           emissive={project.color}
           emissiveIntensity={hovered ? 0.18 : 0.06}
+        />
+      </mesh>
+
+      {/* Reflet au sol (tache de couleur sur la grille en dessous) */}
+      <mesh
+        position={[0, -SCREEN_H / 2 - 1.0, 0.5]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[SCREEN_W * 1.4, 5]} />
+        <meshBasicMaterial
+          color={project.color}
+          transparent
+          opacity={hovered ? 0.22 : 0.12}
+          depthWrite={false}
+          blending={2}
         />
       </mesh>
 
