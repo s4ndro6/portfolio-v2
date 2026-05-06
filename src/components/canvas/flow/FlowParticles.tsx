@@ -1,11 +1,31 @@
 'use client';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { AdditiveBlending, BufferGeometry, Float32BufferAttribute, Points } from 'three';
+import {
+  AdditiveBlending,
+  BufferGeometry,
+  CanvasTexture,
+  Float32BufferAttribute,
+  Points,
+} from 'three';
 import { FLOW_CURVE } from '@/data/path';
 
 export default function FlowParticles({ count = 1500 }: { count?: number }) {
   const ref = useRef<Points>(null);
+
+  const circleTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    return new CanvasTexture(canvas);
+  }, []);
 
   const { positions, speeds, offsets } = useMemo(() => {
     const positions = new Float32Array(count * 3);
@@ -48,13 +68,15 @@ export default function FlowParticles({ count = 1500 }: { count?: number }) {
   return (
     <points ref={ref} geometry={geo}>
       <pointsMaterial
-        size={0.035}
-        color="#4ADE80"
+        map={circleTexture}
+        size={0.06}
+        color="#7FFFB8"
         transparent
-        opacity={0.6}
+        opacity={0.5}
         sizeAttenuation
         depthWrite={false}
         blending={AdditiveBlending}
+        alphaTest={0.001}
       />
     </points>
   );

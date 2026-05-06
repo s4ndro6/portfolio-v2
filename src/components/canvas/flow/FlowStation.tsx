@@ -1,8 +1,8 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { ShaderMaterial, Group } from 'three';
+import { ShaderMaterial, Group, BoxGeometry } from 'three';
 import { Project } from '@/data/projects';
 import { useStore } from '@/store/useStore';
 
@@ -11,88 +11,197 @@ const VERT = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatri
 const SHADERS: Record<string, string> = {
   waves: `
     varying vec2 vUv; uniform float u_time; uniform float u_hover;
-    void main(){
-      vec2 uv=vUv; float t=u_time*0.5;
-      float w1=sin(uv.x*10.0+t)*sin(uv.y*8.0-t*0.7)*0.5+0.5;
-      float w2=sin(uv.x*5.0-t*1.3+uv.y*4.0)*0.3+0.7;
-      vec3 c1=vec3(0.22,0.43,0.87); vec3 c2=vec3(0.08,0.78,0.95);
-      vec2 ct=uv*2.0-1.0; float vig=1.0-dot(ct*0.4,ct*0.4);
-      vec3 col=mix(c1*0.3,c2*0.7,w1*w2)*vig*(0.6+u_hover*0.6);
-      float b=max(max(step(0.95,uv.x),step(0.95,1.0-uv.x)),max(step(0.97,uv.y),step(0.97,1.0-uv.y)));
-      col+=vec3(0.22,0.43,0.87)*b*u_hover*3.0;
-      gl_FragColor=vec4(col,1.0);
+    void main() {
+      vec2 uv = vUv;
+      float t = u_time * 0.35;
+      uv.x += sin(uv.y * 6.0 + t) * 0.04;
+      uv.y += cos(uv.x * 4.0 - t * 0.7) * 0.03;
+      float w1 = sin(uv.x * 8.0 + t * 1.2) * sin(uv.y * 6.0 - t) * 0.5 + 0.5;
+      float w2 = sin((uv.x + uv.y) * 5.0 - t * 0.8) * 0.3 + 0.7;
+      float combined = w1 * w2;
+      float depth = pow(1.0 - uv.y, 1.5) * 0.4;
+      vec3 deep = vec3(0.04, 0.08, 0.28);
+      vec3 light = vec3(0.22, 0.43, 0.87);
+      vec3 highlight = vec3(0.5, 0.75, 1.0);
+      vec3 col = mix(deep, light, combined);
+      col = mix(col, highlight, pow(combined, 3.0) * 0.6);
+      col += depth;
+      vec2 c = uv * 2.0 - 1.0;
+      float vig = 1.0 - dot(c * 0.45, c * 0.45);
+      col *= vig;
+      col *= (0.5 + u_hover * 0.6);
+      float bx = smoothstep(0.92, 1.0, uv.x) + smoothstep(0.08, 0.0, uv.x);
+      float by = smoothstep(0.94, 1.0, uv.y) + smoothstep(0.06, 0.0, uv.y);
+      col += vec3(0.22, 0.43, 0.87) * max(bx, by) * u_hover * 2.0;
+      gl_FragColor = vec4(col, 1.0);
     }`,
   matrix: `
-    varying vec2 vUv; uniform float u_time;  uniform float u_hover;
-    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}
-    void main(){
-      vec2 uv=vUv; float t=u_time*0.4;
-      float col=0.0;
-      for(int i=0;i<30;i++){
-        vec2 seed=vec2(float(i)*0.137,float(i)*0.291);
-        vec2 pos=vec2(hash(seed),fract(hash(seed+0.5)+t*hash(seed+1.0)*0.3));
-        float d=length(uv-pos);
-        col+=0.006/(d*d+0.001);
+    varying vec2 vUv; uniform float u_time; uniform float u_hover;
+    float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5); }
+    void main() {
+      vec2 uv = vUv;
+      float t = u_time * 0.5;
+      vec3 col = vec3(0.0);
+      float cols = 20.0;
+      for (float i = 0.0; i < cols; i++) {
+        float x = i / cols + 0.5 / cols;
+        float speed = 0.3 + h(vec2(i, 0.0)) * 0.5;
+        float offset = h(vec2(i, 1.0));
+        float y = fract(uv.y - t * speed - offset);
+        float dist = abs(uv.x - x) * cols;
+        float brightness = (1.0 - y) * (1.0 - y) * max(0.0, 1.0 - dist * 1.5);
+        col += vec3(0.13, 0.83, 0.50) * brightness * 1.5;
+        float head = smoothstep(0.02, 0.0, y);
+        col += vec3(0.6, 1.0, 0.8) * head * max(0.0, 1.0 - dist * 2.0) * 2.0;
       }
-      vec3 c=vec3(0.13,0.83,0.60)*col*(0.5+u_hover*0.7);
-      gl_FragColor=vec4(c,1.0);
+      vec2 target = vec2(0.5, 0.15);
+      float toTarget = 1.0 - length(uv - target) * 1.5;
+      col += vec3(0.13, 0.83, 0.50) * max(0.0, toTarget) * 0.8;
+      vec2 c = uv * 2.0 - 1.0;
+      col *= 1.0 - dot(c * 0.35, c * 0.35);
+      col *= (0.4 + u_hover * 0.7);
+      gl_FragColor = vec4(col, 1.0);
     }`,
   wireframe: `
     varying vec2 vUv; uniform float u_time; uniform float u_hover;
-    void main(){
-      vec2 uv=vUv*2.0-1.0; float t=u_time*0.5;
-      float r=length(uv);
-      float circles=sin(r*18.0-t*2.5)*0.5+0.5;
-      float angle=atan(uv.y,uv.x);
-      float rays=abs(sin(angle*8.0+t))*0.5+0.5;
-      vec3 c=vec3(0.08,0.76,0.93)*circles*rays*(0.5+u_hover*0.8);
-      c+=vec3(0.05,0.4,0.6)*(1.0-r)*0.3;
-      gl_FragColor=vec4(c,1.0);
+    float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5); }
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float t = u_time * 0.4;
+      vec3 col = vec3(0.0);
+      for (int i = 0; i < 12; i++) {
+        vec2 seed = vec2(float(i) * 0.1734, float(i) * 0.2891);
+        vec2 pos = vec2(h(seed) * 2.0 - 1.0, h(seed + 0.5) * 2.0 - 1.0) * 0.85;
+        float pulse = sin(t * 1.5 + float(i) * 0.8) * 0.5 + 0.5;
+        float d = length(uv - pos);
+        col += vec3(0.08, 0.76, 0.93) * 0.015 / (d + 0.02) * pulse;
+        col += vec3(0.5, 0.9, 1.0) * smoothstep(0.05, 0.0, d) * pulse * 2.0;
+      }
+      float r = length(uv);
+      float rings = sin(r * 15.0 - t * 3.0) * 0.5 + 0.5;
+      rings *= exp(-r * 2.0);
+      col += vec3(0.08, 0.76, 0.93) * rings * 0.4;
+      col *= (1.0 - dot(uv * 0.3, uv * 0.3));
+      col *= (0.4 + u_hover * 0.7);
+      gl_FragColor = vec4(col, 1.0);
     }`,
   embers: `
     varying vec2 vUv; uniform float u_time; uniform float u_hover;
-    float n(vec2 p){vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(fract(sin(dot(i,vec2(127.1,311.7)))*43758.5),fract(sin(dot(i+vec2(1,0),vec2(127.1,311.7)))*43758.5),f.x),mix(fract(sin(dot(i+vec2(0,1),vec2(127.1,311.7)))*43758.5),fract(sin(dot(i+vec2(1,1),vec2(127.1,311.7)))*43758.5),f.x),f.y);}
-    void main(){
-      vec2 uv=vUv; float t=u_time*0.5;
-      uv.y=fract(uv.y+t*0.12);
-      float fire=n(uv*6.0+vec2(0,t))*n(uv*12.0-vec2(t*0.5,0));
-      fire=pow(fire,2.0)*3.0;
-      vec3 c=mix(vec3(0.6,0.05,0.0),vec3(1.0,0.5,0.1),fire)*(0.4+u_hover*0.7);
-      gl_FragColor=vec4(mix(vec3(0),c,fire),1.0);
+    float n(vec2 p) {
+      vec2 i = floor(p); vec2 f = fract(p); f = f*f*(3.0-2.0*f);
+      return mix(
+        mix(fract(sin(dot(i,vec2(127.1,311.7)))*43758.5),fract(sin(dot(i+vec2(1,0),vec2(127.1,311.7)))*43758.5),f.x),
+        mix(fract(sin(dot(i+vec2(0,1),vec2(127.1,311.7)))*43758.5),fract(sin(dot(i+vec2(1,1),vec2(127.1,311.7)))*43758.5),f.x),
+      f.y);
+    }
+    void main() {
+      vec2 uv = vUv; float t = u_time * 0.4;
+      float rock = n(uv * 4.0) * n(uv * 8.0 + vec2(t*0.1, 0.0));
+      vec3 base = mix(vec3(0.06, 0.02, 0.01), vec3(0.15, 0.05, 0.02), rock);
+      float lava = n(uv * 3.0 + vec2(0.0, t * 0.08));
+      lava = pow(lava, 3.0);
+      vec3 lavaCol = mix(vec3(0.8, 0.1, 0.0), vec3(1.0, 0.6, 0.05), lava);
+      base = mix(base, lavaCol, lava * 0.7);
+      float sparks = 0.0;
+      for (float i = 0.0; i < 8.0; i++) {
+        float speed = 0.15 + fract(sin(i) * 43758.5) * 0.15;
+        float ox = (fract(sin(i * 127.1) * 43758.5) - 0.5) * 0.6;
+        vec2 pos = vec2(0.5 + ox, fract(t * speed + fract(sin(i * 311.7) * 43758.5)));
+        pos.x += sin(pos.y * 8.0 + t + i) * 0.04;
+        float d = length(uv - pos);
+        sparks += smoothstep(0.025, 0.0, d) * (1.0 - pos.y);
+      }
+      base += vec3(1.0, 0.5, 0.1) * sparks * 3.0;
+      float light = pow(1.0 - uv.y, 2.0) * 0.5;
+      base += vec3(0.6, 0.1, 0.0) * light;
+      vec2 c = uv * 2.0 - 1.0;
+      base *= 1.0 - dot(c * 0.4, c * 0.4);
+      base *= (0.5 + u_hover * 0.6);
+      gl_FragColor = vec4(base, 1.0);
     }`,
   orbs: `
     varying vec2 vUv; uniform float u_time; uniform float u_hover;
-    void main(){
-      vec2 uv=vUv*2.0-1.0; float t=u_time*0.7; vec3 col=vec3(0);
-      vec3 oc[3]; oc[0]=vec3(0.55,0.36,0.98); oc[1]=vec3(0.08,0.78,0.95); oc[2]=vec3(0.13,0.83,0.60);
-      for(int i=0;i<3;i++){
-        float a=t+float(i)*2.094;
-        vec2 pos=vec2(cos(a)*0.4,sin(a)*0.4);
-        float d=length(uv-pos);
-        col+=oc[i]*0.04/(d*d+0.002);
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float t = u_time * 0.5;
+      vec3 col = vec3(0.0);
+      vec3 colors[3];
+      colors[0] = vec3(0.55, 0.36, 0.97);
+      colors[1] = vec3(0.08, 0.78, 0.95);
+      colors[2] = vec3(0.20, 0.83, 0.60);
+      for (int i = 0; i < 3; i++) {
+        float angle = t + float(i) * 2.094;
+        float r = 0.45 + sin(t * 0.3 + float(i)) * 0.05;
+        vec2 pos = vec2(cos(angle) * r, sin(angle) * r);
+        float d = length(uv - pos);
+        col += colors[i] * 0.025 / (d * d + 0.008);
+        col += colors[i] * smoothstep(0.08, 0.0, d) * 3.0;
+        for (float j = 1.0; j < 5.0; j++) {
+          float trailAngle = angle - j * 0.15;
+          vec2 trailPos = vec2(cos(trailAngle) * r, sin(trailAngle) * r);
+          float td = length(uv - trailPos);
+          col += colors[i] * smoothstep(0.04, 0.0, td) * (1.0 - j/5.0) * 0.8;
+        }
       }
-      float ctr=1.0-length(uv)*1.5;
-      col+=vec3(1.0,0.71,0.33)*max(0.0,ctr)*0.3*(0.5+u_hover*0.5);
-      gl_FragColor=vec4(col,1.0);
+      for (int i = 0; i < 3; i++) {
+        for (int j = i+1; j < 3; j++) {
+          float ai = t + float(i) * 2.094;
+          float aj = t + float(j) * 2.094;
+          vec2 pi2 = vec2(cos(ai) * 0.45, sin(ai) * 0.45);
+          vec2 pj = vec2(cos(aj) * 0.45, sin(aj) * 0.45);
+          vec2 dir = pj - pi2;
+          float len = length(dir);
+          float proj = dot(uv - pi2, dir / len) / len;
+          proj = clamp(proj, 0.0, 1.0);
+          vec2 closest = pi2 + proj * dir;
+          float lineDist = length(uv - closest);
+          float pulse = sin(t * 2.0 + float(i+j)) * 0.5 + 0.5;
+          col += vec3(0.4, 0.6, 1.0) * smoothstep(0.015, 0.0, lineDist) * pulse * 0.5;
+        }
+      }
+      float center = exp(-length(uv) * 4.0);
+      col += vec3(1.0, 0.71, 0.33) * center * 0.8;
+      col *= (1.0 - dot(uv * 0.3, uv * 0.3));
+      col *= (0.4 + u_hover * 0.7);
+      gl_FragColor = vec4(col, 1.0);
     }`,
   crt: `
     varying vec2 vUv; uniform float u_time; uniform float u_hover;
-    float h(float n){return fract(sin(n)*43758.5);}
-    void main(){
-      vec2 uv=vUv; float t=u_time;
-      float scan=sin(uv.y*160.0)*0.04+0.96;
-      float lines=0.0;
-      for(int i=0;i<10;i++){
-        float y=float(i)/10.0;
-        float len=h(float(i)+0.5)*0.7+0.1;
-        float line=step(0.04,uv.x)*step(uv.x,len+0.04)*step(y-0.007,uv.y)*step(uv.y,y+0.007);
-        float cur=step(len+0.02,uv.x)*step(uv.x,len+0.04)*step(y-0.03,uv.y)*step(uv.y,y+0.03)*(sin(t*4.0)*0.5+0.5);
-        lines+=line*0.8+cur;
+    float h(float n) { return fract(sin(n) * 43758.5); }
+    float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5); }
+    void main() {
+      vec2 uv = vUv;
+      float t = u_time * 0.6;
+      vec2 c = uv * 2.0 - 1.0;
+      c *= 1.0 + dot(c, c) * 0.05;
+      uv = c * 0.5 + 0.5;
+      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return;
       }
-      float glitch=step(0.97,h(floor(t*10.0)+uv.y*15.0))*0.2;
-      vec3 c=vec3(0.15,0.85,0.45)*(lines+0.04)*scan*(0.4+u_hover*0.7);
-      vec2 ct=uv*2.0-1.0; float vig=1.0-dot(ct*0.45,ct*0.45);
-      gl_FragColor=vec4(c*vig,1.0);
+      vec3 col = vec3(0.02, 0.08, 0.03);
+      float scan = sin(uv.y * 300.0) * 0.04 + 0.96;
+      for (float i = 0.0; i < 15.0; i++) {
+        float y = i / 15.0 + 0.033;
+        float lineLen = 0.3 + h(i + floor(t * 0.2) * 0.1) * 0.6;
+        float scroll = fract(t * 0.15 + i * 0.07);
+        float lineY = fract(y - scroll);
+        if (lineY > 1.0/15.0) continue;
+        float inLine = step(0.02, uv.x) * step(uv.x, lineLen) *
+                       step(lineY, 0.006) * step(0.001, lineY);
+        float chars = step(0.5, h2(vec2(floor(uv.x * 60.0), floor(lineY * 200.0))));
+        col += vec3(0.15, 0.85, 0.35) * inLine * chars * 0.9 * scan;
+        float cursor = step(lineLen, uv.x) * step(uv.x, lineLen + 0.025) *
+                       step(lineY, 0.006) * step(0.001, lineY) *
+                       (sin(t * 4.0) * 0.5 + 0.5);
+        col += vec3(0.2, 1.0, 0.4) * cursor * 1.5;
+      }
+      float glitch = step(0.985, h(floor(t * 15.0) + floor(uv.y * 20.0)));
+      col.rgb = mix(col.rgb, col.gbr, glitch * 0.5);
+      vec2 cv = uv * 2.0 - 1.0;
+      float vig = (1.0 - cv.x*cv.x) * (1.0 - cv.y*cv.y);
+      col *= pow(vig, 0.25) * scan;
+      col *= (0.5 + u_hover * 0.6);
+      gl_FragColor = vec4(col, 1.0);
     }`,
 };
 
@@ -111,6 +220,8 @@ export default function FlowStation({ project, position, rotationY, stationIndex
   const setActive = useStore(s => s.setActive);
   const isActive = activeProject === project.id;
 
+  const edgeGeo = useMemo(() => new BoxGeometry(6.2, 4.0, 0.0), []);
+
   useFrame(({ clock }) => {
     if (matRef.current) {
       matRef.current.uniforms.u_time.value = clock.elapsedTime;
@@ -123,14 +234,31 @@ export default function FlowStation({ project, position, rotationY, stationIndex
     }
   });
 
+  const cornerOffsets: [number, number][] = [
+    [-3.05, 1.95], [3.05, 1.95], [-3.05, -1.95], [3.05, -1.95],
+  ];
+
   return (
     <group ref={groupRef} position={position} rotation={[0, rotationY, 0]}>
+      {/* Lueur ambiante derrière l'écran */}
+      <mesh position={[0, 0, -0.1]}>
+        <planeGeometry args={[6.7, 4.4]} />
+        <meshStandardMaterial
+          color={project.color}
+          emissive={project.color}
+          emissiveIntensity={hovered ? 0.8 : 0.2}
+          transparent
+          opacity={0.15}
+        />
+      </mesh>
+
+      {/* L'écran principal */}
       <mesh
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         onClick={() => setActive(isActive ? null : project.id)}
       >
-        <planeGeometry args={[4.5, 2.8]} />
+        <planeGeometry args={[6, 3.8]} />
         <shaderMaterial
           ref={matRef}
           vertexShader={VERT}
@@ -139,16 +267,27 @@ export default function FlowStation({ project, position, rotationY, stationIndex
         />
       </mesh>
 
-      <mesh>
-        <boxGeometry args={[4.7, 3.0, 0.04]} />
-        <meshStandardMaterial
-          color={hovered ? project.color : '#111118'}
-          emissive={project.color}
-          emissiveIntensity={hovered ? 0.4 : 0.08}
-          metalness={0.8}
-          roughness={0.3}
+      {/* Cadre fin */}
+      <lineSegments>
+        <edgesGeometry args={[edgeGeo]} />
+        <lineBasicMaterial
+          color={project.color}
+          transparent
+          opacity={hovered ? 0.9 : 0.3}
         />
-      </mesh>
+      </lineSegments>
+
+      {/* Coins lumineux */}
+      {cornerOffsets.map(([cx, cy], i) => (
+        <mesh key={i} position={[cx, cy, 0.02]}>
+          <planeGeometry args={[0.18, 0.18]} />
+          <meshStandardMaterial
+            color={project.color}
+            emissive={project.color}
+            emissiveIntensity={4}
+          />
+        </mesh>
+      ))}
 
       <pointLight
         color={project.color}
@@ -158,7 +297,7 @@ export default function FlowStation({ project, position, rotationY, stationIndex
         position={[0, 0, 0.5]}
       />
 
-      <Html position={[-2.1, 1.6, 0.1]} transform distanceFactor={5}>
+      <Html position={[-2.8, 2.15, 0.1]} transform distanceFactor={5}>
         <div style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '11px',
@@ -171,7 +310,7 @@ export default function FlowStation({ project, position, rotationY, stationIndex
       </Html>
 
       {hovered && (
-        <Html position={[0, -1.75, 0.1]} center transform distanceFactor={5}>
+        <Html position={[0, -2.3, 0.1]} center transform distanceFactor={5}>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: 'italic',

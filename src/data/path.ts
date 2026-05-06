@@ -20,10 +20,10 @@ export const FLOW_CURVE = new CatmullRomCurve3(
 export const STATION_T = [0.10, 0.23, 0.38, 0.52, 0.67, 0.82];
 
 export const STATION_OFFSET = [
-  { x: 5, y: 0.5 },
-  { x: -5, y: -0.3 },
-  { x: 4.5, y: 1.0 },
-  { x: -5.5, y: 0 },
-  { x: 5, y: -0.5 },
-  { x: -4.5, y: 0.8 },
+  { x: 7, y: 0.5 },
+  { x: -7, y: -0.3 },
+  { x: 7, y: 1.0 },
+  { x: -7.5, y: 0 },
+  { x: 7, y: -0.5 },
+  { x: -7, y: 0.8 },
 ];

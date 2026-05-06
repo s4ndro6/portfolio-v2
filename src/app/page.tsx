@@ -44,7 +44,7 @@ export default function Home() {
       <div style={{ position: 'fixed', inset: 0, zIndex: 100, pointerEvents: 'none' }}>
         <HUD />
       </div>
-      <div style={{ height: '1500vh', position: 'relative', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ height: '2500vh', position: 'relative', zIndex: 1, pointerEvents: 'none' }} />
     </>
   );
 }
