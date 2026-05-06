@@ -12,9 +12,16 @@ export default function Home() {
   const setActive = useStore(s => s.setActive);
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
     const onScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       setScroll(max > 0 ? window.scrollY / max : 0);
+      // Si un projet est ouvert, scroller le ferme et on continue le voyage
+      const current = useStore.getState().activeProject;
+      if (current && Math.abs(window.scrollY - lastScrollY) > 4) {
+        setActive(null);
+      }
+      lastScrollY = window.scrollY;
     };
     const onMouse = (e: MouseEvent) => {
       setMouse(

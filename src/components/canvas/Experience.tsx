@@ -10,7 +10,7 @@ import ActEnd from './acts/ActEnd';
 import FlowParticles from './flow/FlowParticles';
 
 const ROOM_CAM_START = new Vector3(0, 1.6, 6);
-const ROOM_CAM_END = new Vector3(0, 1.2, 0.3);
+const ROOM_CAM_END = new Vector3(0, 1.4, 0.3); // hauteur exacte du centre du moniteur
 
 export default function Experience() {
   const { camera } = useThree();
@@ -40,13 +40,29 @@ export default function Experience() {
       camPos.current.lerpVectors(ROOM_CAM_START, ROOM_CAM_END, ease);
       camPos.current.x += lmx.current * 0.15 * (1 - ease * 0.7);
       camPos.current.y += lmy.current * 0.08;
-      camLook.current.set(lmx.current * 0.1, 1.2 + lmy.current * 0.05, 0);
+      // regarde le centre du moniteur (Y=1.4)
+      camLook.current.set(lmx.current * 0.1, 1.4 + lmy.current * 0.05, -1.7);
+    } else if (s < 0.27) {
+      // Approche : camera AVANCE sur Z, Y FIGÉ à 1.4 (centre moniteur)
+      const t = (s - 0.20) / 0.07;
+      const ease = t * t;
+      camPos.current.set(
+        lmx.current * 0.04 * (1 - ease),
+        1.4, // pas de descente
+        ROOM_CAM_END.z + (-2.5 - ROOM_CAM_END.z) * ease, // 0.3 → -2.5 (traverse l'écran à -1.7)
+      );
+      camLook.current.set(0, 1.4, -4); // regarde droit dans l'écran
     } else if (s < 0.30) {
-      const t = (s - 0.20) / 0.10;
+      // Warp : on bascule dans le flow, Y descend rapidement vers la courbe
+      const t = (s - 0.27) / 0.03;
+      const ease = t * t * (3 - 2 * t);
       const flowStart = FLOW_CURVE.getPoint(0);
-      const beforeFlow = new Vector3(flowStart.x, flowStart.y + 0.2, flowStart.z + 2);
-      camPos.current.lerpVectors(ROOM_CAM_END, beforeFlow, t * t);
-      camLook.current.copy(FLOW_CURVE.getPoint(0.02));
+      camPos.current.set(
+        0 + (flowStart.x - 0) * ease,
+        1.4 + (flowStart.y - 1.4) * ease,
+        -2.5 + (flowStart.z - -2.5) * ease,
+      );
+      camLook.current.copy(FLOW_CURVE.getPoint(0.04));
     } else if (s < 0.90) {
       const t = (s - 0.30) / 0.60;
       FLOW_CURVE.getPoint(t, flowPosRef.current);

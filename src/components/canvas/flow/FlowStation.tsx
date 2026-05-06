@@ -589,7 +589,7 @@ export default function FlowStation({ project, position, rotationY, stationIndex
                 </span>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               {project.url && (
                 <a href={project.url} target="_blank" rel="noreferrer" style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -605,16 +605,15 @@ export default function FlowStation({ project, position, rotationY, stationIndex
                   Voir ↗
                 </a>
               )}
-              <button onClick={() => setActive(null)} style={{
+              <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '10px',
-                letterSpacing: '2px',
+                fontSize: '9px',
+                letterSpacing: '3px',
                 textTransform: 'uppercase',
                 color: 'rgba(232,236,240,0.3)',
-                background: 'none', border: 'none', cursor: 'pointer',
               }}>
-                Fermer
-              </button>
+                ↓ scroll pour continuer
+              </span>
             </div>
           </div>
           <style>{`
