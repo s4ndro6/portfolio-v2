@@ -1,30 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Sandro Schillaci — Neural Tower",
+  title: "Sandro Schillaci — Enter the Flow",
   description:
     "Solo full-stack AI builder. Lille. Systèmes IA, automation, interfaces qui marquent.",
   authors: [{ name: "Alessandro Schillaci" }],
@@ -39,7 +17,7 @@ export const metadata: Metadata = {
     "automation",
   ],
   openGraph: {
-    title: "Sandro Schillaci — Neural Tower",
+    title: "Sandro Schillaci — Enter the Flow",
     description: "Solo full-stack AI builder. Systèmes qui tournent. Pas de slides.",
     type: "website",
     locale: "fr_FR",
@@ -48,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#040408",
+  themeColor: "#02020A",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -57,14 +35,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="fr"
-      className={`${inter.variable} ${cormorant.variable} ${jetbrains.variable}`}
-    >
+    <html lang="fr">
       <body>{children}</body>
     </html>
   );

@@ -1,51 +1,50 @@
 'use client';
-import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useStore } from '@/store/useStore';
 import HUD from '@/components/hud/HUD';
 
-const CanvasRoot = dynamic(
-  () => import('@/components/canvas/CanvasRoot'),
-  { ssr: false }
-);
+const CanvasRoot = dynamic(() => import('@/components/canvas/CanvasRoot'), { ssr: false });
 
 export default function Home() {
-  const setMouse = useStore(s => s.setMouse);
   const setScroll = useStore(s => s.setScroll);
+  const setMouse = useStore(s => s.setMouse);
+  const setActive = useStore(s => s.setActive);
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      setMouse(
-        (e.clientX / window.innerWidth - 0.5) * 2,
-        -(e.clientY / window.innerHeight - 0.5) * 2
-      );
-    };
     const onScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setScroll(window.scrollY / Math.max(max, 1));
+      setScroll(max > 0 ? window.scrollY / max : 0);
     };
-    window.addEventListener('mousemove', onMove, { passive: true });
+    const onMouse = (e: MouseEvent) => {
+      setMouse(
+        (e.clientX / window.innerWidth - 0.5) * 2,
+        -(e.clientY / window.innerHeight - 0.5) * 2,
+      );
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActive(null);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('mousemove', onMouse, { passive: true });
+    window.addEventListener('keydown', onKey);
+    onScroll();
     return () => {
-      window.removeEventListener('mousemove', onMove);
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('mousemove', onMouse);
+      window.removeEventListener('keydown', onKey);
     };
-  }, [setMouse, setScroll]);
+  }, [setScroll, setMouse, setActive]);
 
   return (
     <>
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0
-      }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
         <CanvasRoot />
       </div>
-      <HUD />
-      <div style={{
-        height: '1200vh',
-        position: 'relative',
-        zIndex: 1,
-        pointerEvents: 'none'
-      }} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 100, pointerEvents: 'none' }}>
+        <HUD />
+      </div>
+      <div style={{ height: '1500vh', position: 'relative', zIndex: 1, pointerEvents: 'none' }} />
     </>
   );
 }

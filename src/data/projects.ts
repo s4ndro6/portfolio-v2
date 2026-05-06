@@ -7,9 +7,7 @@ export interface Project {
   stack: string[];
   url?: string;
   color: string;
-  nodeY: number;
-  angle: number;
-  branchLen: number;
+  shaderType: 'waves' | 'matrix' | 'wireframe' | 'embers' | 'orbs' | 'crt';
 }
 
 export const PROJECTS: Project[] = [
@@ -19,53 +17,44 @@ export const PROJECTS: Project[] = [
     name: 'Fluvo',
     tagline: "L'agence qui se gère elle-même.",
     description:
-      'SaaS 360° pour agences digitales. CRM, outbound auto, portail client, Stripe MRR, 3 agents IA. 20k LOC, 201 endpoints, 28 tables.',
-    stack: ['Next.js', 'FastAPI', 'PostgreSQL', 'Stripe', 'Resend'],
+      'SaaS 360° — CRM, outbound auto, portail client, Stripe, 3 agents IA. 201 endpoints en prod.',
+    stack: ['Next.js', 'FastAPI', 'PostgreSQL', 'Stripe'],
     url: 'https://fluvo.app',
     color: '#5B8DEE',
-    nodeY: 9,
-    angle: 0.0,
-    branchLen: 7,
+    shaderType: 'waves',
   },
   {
     id: 'hunt',
     index: 1,
     name: 'Alternance Hunt',
-    tagline: '330+ candidatures envoyées sans bouger.',
+    tagline: '330+ candidatures sans bouger.',
     description:
-      'Pipeline n8n autonome. 6 sources scrapées, scoring Groq, envoi Gmail + LBA API.',
+      'Pipeline n8n autonome. 6 sources, scoring Groq, envoi Gmail + LBA.',
     stack: ['n8n', 'Groq', 'Next.js', 'Gmail API'],
-    url: 'https://alternance-hunt.vercel.app',
     color: '#34D399',
-    nodeY: 5,
-    angle: Math.PI / 3,
-    branchLen: 7,
+    shaderType: 'matrix',
   },
   {
     id: 'nexus',
     index: 2,
     name: 'NEXUS Agent',
-    tagline: 'Agent IA local qui voit et navigue.',
+    tagline: 'Agent IA local qui voit tout.',
     description:
-      'FastAPI + LangGraph 7 nœuds, browser-use CDP, vision Ollama only, Qdrant.',
+      'LangGraph 7 nœuds, browser-use CDP, Ollama vision, Qdrant.',
     stack: ['LangGraph', 'FastAPI', 'Ollama', 'Qdrant'],
     color: '#22D3EE',
-    nodeY: 1,
-    angle: (Math.PI * 2) / 3,
-    branchLen: 7,
+    shaderType: 'wireframe',
   },
   {
     id: 'arcane',
     index: 3,
     name: 'Arcane Fury',
-    tagline: 'Combat VR avec physique réelle.',
+    tagline: 'Combat VR physique.',
     description:
-      'Jeu Unity 6.4 LTS Meta Quest 3S. ConfigurableJoint, 3 écoles de magie, ragdoll.',
-    stack: ['Unity 6.4', 'C#', 'Meta Quest 3S', 'VR'],
+      'Unity 6.4, Meta Quest 3S, ragdoll, 3 écoles de magie.',
+    stack: ['Unity 6.4', 'C#', 'Meta Quest 3S'],
     color: '#FF6B35',
-    nodeY: -3,
-    angle: Math.PI,
-    branchLen: 7,
+    shaderType: 'embers',
   },
   {
     id: 'agents',
@@ -73,24 +62,20 @@ export const PROJECTS: Project[] = [
     name: 'Léa · Hugo · Noam',
     tagline: 'Mon équipe IA dans Fluvo.',
     description:
-      '3 agents LangGraph spécialisés en prod dans Fluvo. Contenu, prospection, exécution.',
-    stack: ['LangGraph', 'Claude', 'Groq', 'RAG'],
+      '3 agents spécialisés orchestrés LangGraph. En prod.',
+    stack: ['LangGraph', 'Claude', 'Groq'],
     color: '#A78BFA',
-    nodeY: -7,
-    angle: (Math.PI * 4) / 3,
-    branchLen: 7,
+    shaderType: 'orbs',
   },
   {
     id: 'jarvis',
     index: 5,
     name: 'Jarvis',
-    tagline: 'Mon terminal augmenté.',
+    tagline: 'Terminal augmenté.',
     description:
-      'Claude Code WSL, 10 skills custom, 12 commandes, 4 MCP, 3 hooks. Sync Obsidian.',
+      'Claude Code WSL, 10 skills, 4 MCP, 3 hooks. Sync Obsidian.',
     stack: ['Claude Code', 'MCP', 'WSL', 'Bash'],
     color: '#4ADE80',
-    nodeY: -11,
-    angle: (Math.PI * 5) / 3,
-    branchLen: 7,
+    shaderType: 'crt',
   },
 ];

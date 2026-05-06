@@ -9,36 +9,31 @@ import {
   Vignette,
 } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
-import World from './World';
+import Experience from './Experience';
 
 export default function CanvasRoot() {
   return (
     <Canvas
-      gl={{
-        antialias: true,
-        alpha: false,
-        powerPreference: 'high-performance',
-      }}
+      style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
+      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       dpr={[1, 2]}
-      camera={{ position: [0, 8, 12], fov: 55, near: 0.1, far: 300 }}
-      shadows={false}
-      style={{ touchAction: 'pan-y' }}
+      camera={{ position: [0, 1.6, 6], fov: 60, near: 0.01, far: 300 }}
     >
       <Suspense fallback={null}>
-        <World />
+        <Experience />
       </Suspense>
       <EffectComposer multisampling={0}>
         <Bloom
-          intensity={0.8}
-          luminanceThreshold={0.3}
-          luminanceSmoothing={0.5}
+          intensity={1.2}
+          luminanceThreshold={0.15}
+          luminanceSmoothing={0.4}
           mipmapBlur
         />
         <ChromaticAberration
-          offset={[0.0008, 0.0008]}
+          offset={[0.0006, 0.0006]}
           blendFunction={BlendFunction.NORMAL}
         />
-        <Vignette eskil={false} offset={0.18} darkness={0.85} />
+        <Vignette eskil={false} offset={0.25} darkness={0.9} />
       </EffectComposer>
     </Canvas>
   );
