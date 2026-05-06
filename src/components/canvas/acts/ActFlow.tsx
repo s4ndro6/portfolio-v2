@@ -3,12 +3,14 @@ import { PROJECTS } from '@/data/projects';
 import { STATION_T, STATION_OFFSET, FLOW_CURVE } from '@/data/path';
 import FlowStation from '../flow/FlowStation';
 import FlowWires from '../flow/FlowWires';
+import FlowTunnel from '../flow/FlowTunnel';
 
 interface Props { opacity: number; }
 
 export default function ActFlow({ opacity }: Props) {
   return (
     <group>
+      <FlowTunnel />
       <FlowWires />
 
       {PROJECTS.map((project, i) => {

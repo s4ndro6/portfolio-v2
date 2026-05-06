@@ -92,10 +92,16 @@ export default function Experience() {
   const roomOpacity = scroll < 0.20 ? 1 : Math.max(0, 1 - (scroll - 0.20) / 0.10);
   const flowOpacity = scroll < 0.25 ? 0 : Math.min(1, (scroll - 0.25) / 0.10);
 
+  // Fog : serré dans le tunnel (8, 45), large dans la chambre (15, 80)
+  const fogTransition = Math.max(0, Math.min(1, (scroll - 0.25) / 0.10));
+  const fogColor = fogTransition < 0.5 ? '#02020A' : '#0A0A20';
+  const fogNear = 15 + (8 - 15) * fogTransition;
+  const fogFar = 80 + (45 - 80) * fogTransition;
+
   return (
     <>
       <color attach="background" args={['#02020A']} />
-      <fog attach="fog" args={['#02020A', 15, 80]} />
+      <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
       <ambientLight intensity={0.04} color="#3050FF" />
 
       {roomOpacity > 0.01 && (
