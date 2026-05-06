@@ -1,3 +1,14 @@
+html {
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+body {
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  min-height: 100vh !important;
+}
+
 :root {
   --void: #040408;
   --amber: #FFB454;
@@ -19,11 +30,6 @@
   box-sizing: border-box;
 }
 
-html, body {
-  height: auto !important;
-  overflow-y: scroll !important;
-  overflow-x: hidden;
-}
 html {
   scrollbar-width: none;
 }
