@@ -28,13 +28,13 @@ export default function FlowWires() {
   return (
     <>
       <mesh>
-        <tubeGeometry args={[FLOW_CURVE, 200, 0.004, 4, false]} />
+        <tubeGeometry args={[FLOW_CURVE, 200, 0.003, 4, false]} />
         <meshStandardMaterial
           color="#22D3EE"
           emissive="#22D3EE"
           emissiveIntensity={1.0}
           transparent
-          opacity={0.12}
+          opacity={0.06}
         />
       </mesh>
 

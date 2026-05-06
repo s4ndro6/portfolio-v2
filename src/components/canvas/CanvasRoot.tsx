@@ -18,6 +18,7 @@ export default function CanvasRoot() {
       style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       dpr={[1, 2]}
+      shadows
       camera={{ position: [0, 1.6, 6], fov: 60, near: 0.01, far: 300 }}
     >
       <Suspense fallback={null}>
@@ -26,8 +27,8 @@ export default function CanvasRoot() {
       </Suspense>
       <EffectComposer multisampling={0}>
         <Bloom
-          intensity={1.2}
-          luminanceThreshold={0.15}
+          intensity={1.4}
+          luminanceThreshold={0.1}
           luminanceSmoothing={0.4}
           mipmapBlur
         />

@@ -53,10 +53,11 @@ export default function Experience() {
       FLOW_CURVE.getTangent(t, flowTanRef.current);
       camPos.current.copy(flowPosRef.current);
       camPos.current.x += lmx.current * 0.4;
-      camPos.current.y += lmy.current * 0.25 + 0.5;
+      camPos.current.y += lmy.current * 0.25 - 0.2;
       const lookT = Math.min(t + 0.06, 1.0);
       FLOW_CURVE.getPoint(lookT, camLook.current);
       camLook.current.x += lmx.current * 0.2;
+      camLook.current.y -= 0.4;
     } else {
       const t = (s - 0.90) / 0.10;
       const endPos = FLOW_CURVE.getPoint(1);
